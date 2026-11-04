@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>U8 Danışmanlık & Ajans - Dijital Kartvizit</title>
+  
+  <!-- PWA & Mobile Web App Meta Etiketleri -->
+  <meta name="theme-color" content="#1b3b2b">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="U8 Danışmanlık">
+  <meta name="mobile-web-app-capable" content="yes">
+
+  <!-- Dinamik Manifest Bağlantısı (JavaScript ile otomatik enjekte edilir) -->
+  <link id="manifest-placeholder" rel="manifest">
+
+  <!-- Google Fonts & Tailwind CSS -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- QR Code Library for quick sharing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- HTML2Canvas for saving card as image -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            u8: {
+              green: '#1b3b2b',
+              greenDark: '#0e2418',
+              greenLight: '#2c5e44',
+              red: '#88001b',
+              redDark: '#5e0012',
+              surface: '#ffffff'
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            serif: ['Cinzel', 'serif']
+          },
+          boxShadow: {
+            'card': '0 25px 60px -15px rgba(14, 36, 24, 0.45)',
+            'sphere': '0 8px 18px rgba(18, 37, 27, 0.08), inset 0 2px 4px rgba(255, 255, 255, 0.95)'
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background: radial-gradient(circle at 50% 10%, #152e22 0%, #0c1c14 55%, #050a07 100%);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .orb-1 {
+      position: fixed;
+      width: 440px;
+      height: 440px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(136, 0, 27, 0.28) 0%, rgba(0,0,0,0) 70%);
+      top: -90px;
+      right: -110px;
+      z-index: 0;
+      pointer-events: none;
+      filter: blur(55px);
+    }
+    
+    .orb-2 {
+      position: fixed;
+      width: 460px;
+      height: 460px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(44, 94, 68, 0.35) 0%, rgba(0,0,0,0) 70%);
+      bottom: -80px;
+      left: -130px;
+      z-index: 0;
+      pointer-events: none;
+      filter: blur(65px);
+    }
+
+    .save-btn-gradient {
+      background: linear-gradient(135deg, #88001b 0%, #ad0d2b 45%, #1b3b2b 100%);
+      background-size: 200% 200%;
+      animation: gradientShift 5s ease infinite;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .sphere-icon {
+      background: radial-gradient(circle at 35% 30%, #ffffff 0%, #f7faf8 65%, #dce5e0 100%);
+      box-shadow: 0 5px 15px rgba(14, 36, 24, 0.08), inset 0 2px 4px rgba(255, 255, 255, 0.95);
+    }
+
+    .sphere-ring-green {
+      border: 2px solid #1b3b2b;
+      border-top-color: transparent;
+      border-left-color: #88001b;
+    }
+
+    .sphere-ring-red {
+      border: 2px solid #88001b;
+      border-bottom-color: transparent;
+      border-right-color: #1b3b2b;
+    }
+
+    .tab-active {
+      background: linear-gradient(135deg, #1b3b2b 0%, #0e2418 100%) !important;
+      color: #ffffff !important;
+      box-shadow: 0 4px 14px rgba(14, 36, 24, 0.35);
+    }
+    .tab-inactive {
+      background: #f1f5f3 !important;
+      color: #4b5563 !important;
+    }
+
+    .interactive-btn {
+      touch-action: manipulation;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+    }
+    .interactive-btn:active {
+      transform: scale(0.96);
+    }
+  </style>
+</head>
+
+<body class="flex items-center justify-center p-3 sm:p-6 text-slate-800 antialiased selection:bg-u8-red selection:text-white">
+
+  <!-- Background Ambient Glow -->
+  <div class="orb-1"></div>
+  <div class="orb-2"></div>
+
+  <!-- Main Card Container -->
+  <main id="card-to-export" class="relative z-10 w-full max-w-[440px] bg-white rounded-[2rem] sm:rounded-[2.5rem] shadow-card overflow-hidden border border-white/60 transition-all duration-300">
+    
+    <!-- Top Branding Header -->
+    <header class="relative px-5 sm:px-6 pt-5 pb-3 text-center border-b border-slate-100 bg-gradient-to-b from-slate-50/80 via-white to-white">
+      
+      <!-- Top Action Floating Controls -->
+      <div class="flex items-center justify-between mb-2">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10.5px] font-bold tracking-wider uppercase bg-emerald-50 text-u8-green border border-emerald-200/80">
+          <span class="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
+          U8 Danışmanlık ve Ajans
+        </span>
+        
+        <div class="flex items-center gap-1.5">
+          <!-- Şifre Korumalı Yönetici Logo Yükleme / Değiştirme Butonu -->
+          <button type="button" id="admin-logo-btn" onclick="openAdminPasswordModal()" title="Yönetici Logo Paneli (Şifreli)" class="interactive-btn w-9 h-9 flex items-center justify-center rounded-xl bg-slate-100 text-slate-600 hover:text-u8-red hover:bg-rose-50 border border-slate-200 shadow-sm cursor-pointer">
+            <i class="fa-solid fa-lock text-xs pointer-events-none"></i>
+          </button>
+          <input type="file" id="admin-logo-upload" accept="image/*" class="hidden" onchange="handleCustomLogoUpload(event)">
+
+          <button id="install-app-btn" type="button" title="Uygulama Olarak İndir" onclick="promptInstallPWA()" class="interactive-btn w-9 h-9 flex items-center justify-center rounded-xl bg-slate-100 text-slate-700 hover:text-u8-green hover:bg-emerald-50 border border-slate-200 shadow-sm">
+            <i class="fa-solid fa-mobile-screen-button text-sm pointer-events-none"></i>
+          </button>
+
+          <button id="qr-trigger-btn" type="button" title="Karekod Göster" onclick="showQrModal()" class="interactive-btn w-9 h-9 flex items-center justify-center rounded-xl bg-slate-100 text-slate-700 hover:text-u8-green hover:bg-emerald-50 border border-slate-200 shadow-sm">
+            <i class="fa-solid fa-qrcode text-base pointer-events-none"></i>
+          </button>
+          <button id="img-download-trigger-btn" type="button" title="Görsel Olarak İndir" onclick="handleDownloadCardImage()" class="interactive-btn w-9 h-9 flex items-center justify-center rounded-xl bg-slate-100 text-slate-700 hover:text-u8-red hover:bg-rose-50 border border-slate-200 shadow-sm">
+            <i class="fa-solid fa-cloud-arrow-down text-base pointer-events-none"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- LOGO ALANI: Birebir U8 Amblem ve Tipografi (Veya Yüklediğiniz Logo) -->
+      <div id="logo-container" class="flex justify-center items-center py-2 px-1 relative min-h-[110px]">
+        
+        <!-- Yüklenen Özel Logo (Varsayılan Gizli) -->
+        <img id="custom-logo-img" src="" alt="U8 Danışmanlık Logo" class="hidden max-h-28 max-w-[90%] object-contain drop-shadow-md mx-auto" />
+
+        <!-- Standart Vektörel Orijinal U8 Logosu (Görseldeki U ve 8 Karakter Detayları) -->
+        <div id="vector-logo-block" class="w-full flex items-center justify-center gap-3">
+          <!-- Vektörel 'U' ve iç içe '8' Monogramı -->
+          <svg class="w-24 sm:w-28 h-24 sm:h-28 flex-shrink-0 drop-shadow-sm select-none" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <filter id="shadowEight" x="-20%" y="-20%" width="150%" height="150%">
+                <feDropShadow dx="2" dy="3" stdDeviation="3" flood-color="#40000a" flood-opacity="0.35"/>
+              </filter>
+            </defs>
+
+            <!-- Koyu Yeşil Klasik Serif 'U' Harfi -->
+            <!-- Sol kanat ve serif -->
+            <path d="M 28 32 C 34 32 44 32 50 34 C 47 38 45 44 45 54 L 45 92 C 45 106 52 118 64 123 C 74 127 86 126 95 120 C 101 116 106 110 110 104 C 114 110 120 116 126 120 C 108 135 88 139 67 136 C 44 133 26 117 22 92 C 20 80 20 64 20 50 C 20 38 18 34 12 32 Z" fill="#1b3b2b"/>
+            <!-- Sağ kanat ve serif -->
+            <path d="M 104 32 C 112 32 122 32 128 34 C 124 38 122 44 122 54 L 122 84 C 114 91 106 98 98 103 C 101 94 102 82 102 68 L 102 50 C 102 38 100 34 94 32 Z" fill="#1b3b2b"/>
+
+            <!-- U ile Kenetlenen Bordo / Kırmızı '8' Rakamı -->
+            <g filter="url(#shadowEight)">
+              <path d="M 94 48
+                       C 104 48 113 53 118 61
+                       C 123 69 122 79 116 86
+                       C 111 92 103 98 95 102
+                       C 104 107 114 115 117 125
+                       C 120 136 113 147 102 152
+                       C 90 157 76 155 67 149
+                       C 58 143 53 132 55 120
+                       C 57 109 66 100 76 93
+                       C 68 88 62 81 61 72
+                       C 59 61 65 51 76 48
+                       C 82 46 88 47 94 48 Z
+                       M 91 58
+                       C 84 58 78 63 78 71
+                       C 78 78 84 84 91 87
+                       C 98 84 104 78 104 71
+                       C 104 63 98 58 91 58 Z
+                       M 88 104
+                       C 79 109 72 117 72 126
+                       C 72 134 79 141 89 141
+                       C 98 141 105 134 105 126
+                       C 105 117 98 109 88 104 Z" 
+                    fill="#88001b"/>
+            </g>
+          </svg>
+
+          <!-- Yazı Alanı: U 8 DANIŞMANLIK -->
+          <div class="text-left select-none">
+            <div class="text-xs sm:text-sm font-extrabold text-u8-red tracking-[0.35em] uppercase font-serif">
+              U 8
+            </div>
+            <div class="text-lg sm:text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-u8-red via-red-700 to-u8-green tracking-wider uppercase font-serif">
+              DANIŞMANLIK
+            </div>
+            <div class="text-[9px] sm:text-[10px] font-extrabold text-u8-green tracking-[0.28em] uppercase">
+              VE AJANS HİZMETLERİ
+            </div>
+          </div>
+        </div>
+
+        <!-- Özel logo yüklendiğinde eski logoya dön butonu -->
+        <button id="reset-logo-btn" onclick="resetToVectorLogo()" type="button" class="hidden absolute top-0 right-0 text-[10px] font-bold text-slate-400 hover:text-u8-red bg-white/80 px-2 py-0.5 rounded border border-slate-200">
+          Varsayılana Dön
+        </button>
+      </div>
+
+      <!-- Person Switcher Tabs (Rezzan & Büşra) -->
+      <div class="mt-2 p-1 bg-slate-100 rounded-2xl flex items-center justify-between gap-1 border border-slate-200">
+        <button id="tab-rezzan-btn" type="button" onclick="setProfile('rezzan')" class="interactive-btn w-1/2 py-2.5 px-2 rounded-xl text-xs sm:text-sm font-bold tracking-tight flex items-center justify-center gap-2 tab-active">
+          <i class="fa-solid fa-user-tie text-xs"></i>
+          <span>Rezzan Ç. Lama</span>
+        </button>
+        <button id="tab-busra-btn" type="button" onclick="setProfile('busra')" class="interactive-btn w-1/2 py-2.5 px-2 rounded-xl text-xs sm:text-sm font-bold tracking-tight flex items-center justify-center gap-2 tab-inactive">
+          <i class="fa-solid fa-user-gear text-xs"></i>
+          <span>Büşra Yağar</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Profile Info & Quick Actions -->
+    <section class="px-5 sm:px-6 py-4 text-center">
+      
+      <!-- Avatar & Verified Badge -->
+      <div class="relative inline-block mb-2">
+        <div id="person-avatar" class="w-20 h-20 sm:w-22 sm:h-22 mx-auto rounded-3xl bg-gradient-to-br from-u8-green to-u8-greenDark text-white flex items-center justify-center text-2xl font-black shadow-lg border-4 border-white transition-all">
+          RÇ
+        </div>
+        <div class="absolute -bottom-1 -right-1 bg-u8-red text-white w-7 h-7 rounded-full border-2 border-white shadow flex items-center justify-center text-xs">
+          <i class="fa-solid fa-check"></i>
+        </div>
+      </div>
+
+      <!-- Names & Titles -->
+      <h1 id="person-name" class="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 leading-tight">
+        Rezzan Çağıl Lama
+      </h1>
+      <p id="person-title" class="text-xs sm:text-sm font-bold text-u8-red tracking-wider uppercase mt-0.5">
+        General Manager
+      </p>
+      <p class="text-[11.5px] text-slate-500 font-medium mt-1">
+        U8 Danışmanlık ve Ajans • Stratejik Büyüme & Dijital Çözümler
+      </p>
+
+      <!-- Primary Action: Tek Tuşla Rehbere Kaydet (.vcf) -->
+      <div class="mt-4">
+        <button id="vcard-download-btn" type="button" onclick="handleDownloadVCard()" class="save-btn-gradient interactive-btn w-full py-3.5 px-4 rounded-2xl text-white font-extrabold text-xs sm:text-sm tracking-wide shadow-lg shadow-u8-red/30 flex items-center justify-center gap-2.5">
+          <i class="fa-solid fa-user-plus text-base pointer-events-none"></i>
+          <span>REHBERE KAYDET (TEK TIKLA)</span>
+        </button>
+        <span class="block text-[10.5px] text-slate-400 mt-1 font-medium">iPhone ve Android için anında rehber kaydı oluşturur</span>
+      </div>
+
+      <!-- Quick Action Buttons (Call, WhatsApp, Email, Website, Navigation) -->
+      <div class="grid grid-cols-5 gap-1.5 sm:gap-2 mt-4">
+        <a id="btn-call" href="tel:+905515061912" class="interactive-btn flex flex-col items-center justify-center p-2 rounded-2xl bg-slate-50 hover:bg-emerald-50 text-slate-700 hover:text-u8-green border border-slate-200/80 shadow-sm group">
+          <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white flex items-center justify-center text-emerald-700 shadow-sm group-hover:scale-110 transition">
+            <i class="fa-solid fa-phone text-xs sm:text-sm"></i>
+          </div>
+          <span class="text-[10px] sm:text-[11px] font-bold mt-1.5">Ara</span>
+        </a>
+
+        <a id="btn-whatsapp" href="https://wa.me/905515061912" target="_blank" rel="noopener noreferrer" class="interactive-btn flex flex-col items-center justify-center p-2 rounded-2xl bg-slate-50 hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border border-slate-200/80 shadow-sm group">
+          <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white flex items-center justify-center text-emerald-500 shadow-sm group-hover:scale-110 transition">
+            <i class="fa-brands fa-whatsapp text-base sm:text-lg"></i>
+          </div>
+          <span class="text-[10px] sm:text-[11px] font-bold mt-1.5">WhatsApp</span>
+        </a>
+
+        <a id="btn-mail" href="mailto:info@u8belgelendirme.com" class="interactive-btn flex flex-col items-center justify-center p-2 rounded-2xl bg-slate-50 hover:bg-rose-50 text-slate-700 hover:text-u8-red border border-slate-200/80 shadow-sm group">
+          <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white flex items-center justify-center text-u8-red shadow-sm group-hover:scale-110 transition">
+            <i class="fa-solid fa-envelope text-xs sm:text-sm"></i>
+          </div>
+          <span class="text-[10px] sm:text-[11px] font-bold mt-1.5">E-Posta</span>
+        </a>
+
+        <a id="btn-site-top" href="https://u8belgelendirme.com/" target="_blank" rel="noopener noreferrer" class="interactive-btn flex flex-col items-center justify-center p-2 rounded-2xl bg-slate-50 hover:bg-teal-50 text-slate-700 hover:text-u8-green border border-slate-200/80 shadow-sm group">
+          <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white flex items-center justify-center text-u8-green shadow-sm group-hover:scale-110 transition">
+            <i class="fa-solid fa-globe text-xs sm:text-sm"></i>
+          </div>
+          <span class="text-[10px] sm:text-[11px] font-bold mt-1.5">Web</span>
+        </a>
+
+        <!-- Yol Tarifi / Navigasyon Butonu -->
+        <a id="btn-map" href="https://www.google.com/maps/search/?api=1&query=U8+Dan%C4%B1%C5%9Fmanl%C4%B1k+ve+Ajans" target="_blank" rel="noopener noreferrer" class="interactive-btn flex flex-col items-center justify-center p-2 rounded-2xl bg-slate-50 hover:bg-amber-50 text-slate-700 hover:text-amber-700 border border-slate-200/80 shadow-sm group">
+          <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white flex items-center justify-center text-amber-600 shadow-sm group-hover:scale-110 transition">
+            <i class="fa-solid fa-location-dot text-xs sm:text-sm"></i>
+          </div>
+          <span class="text-[10px] sm:text-[11px] font-bold mt-1.5">Yol Tarifi</span>
+        </a>
+      </div>
+
+      <!-- Quick Number Display & Copy -->
+      <div class="mt-3 px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200/70 flex items-center justify-between text-xs font-semibold text-slate-700">
+        <span class="flex items-center gap-1.5 text-slate-500 text-[11px]">
+          <i class="fa-solid fa-phone-volume text-u8-green"></i> İletişim Hattı:
+        </span>
+        <span id="person-phone-display" class="font-mono tracking-wider font-extrabold text-slate-900 text-xs sm:text-sm">
+          0 551 506 19 12
+        </span>
+        <button id="copy-phone-btn" type="button" onclick="copyCurrentPhone()" class="interactive-btn text-xs text-u8-red hover:text-u8-redDark font-extrabold px-2.5 py-1 bg-rose-50 rounded-lg border border-rose-100">
+          Kopyala
+        </button>
+      </div>
+    </section>
+
+    <!-- Services & Marketing Showcase -->
+    <section class="px-5 sm:px-6 py-4 bg-gradient-to-b from-slate-50 to-[#edf3ef] border-t border-slate-200/70">
+      
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-900 flex items-center gap-1.5">
+            <i class="fa-solid fa-gem text-u8-red"></i> Ne Yapıyoruz? Hizmetlerimiz
+          </h2>
+          <p class="text-[10px] text-slate-500 font-medium">Markanızı güçlendiren profesyonel danışmanlık & ajans çözümleri</p>
+        </div>
+        <span class="text-[10px] font-extrabold text-u8-green bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-300">360° Ajans</span>
+      </div>
+
+      <!-- Featured 1: Profesyonel Web Sitesi Tasarımı -->
+      <a href="https://u8belgelendirme.com/" target="_blank" rel="noopener noreferrer" class="interactive-btn block mb-3 p-3.5 rounded-2xl bg-gradient-to-br from-[#0e2418] to-[#1b3b2b] text-white shadow-md hover:shadow-lg border border-emerald-800/60 group relative overflow-hidden">
+        <div class="absolute -right-3 -bottom-3 opacity-15 group-hover:opacity-25 group-hover:scale-110 transition duration-500 text-white">
+          <i class="fa-solid fa-laptop-code text-7xl"></i>
+        </div>
+        <div class="flex items-start gap-3 relative z-10">
+          <div class="w-11 h-11 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center text-emerald-300 text-lg flex-shrink-0 group-hover:bg-u8-red group-hover:text-white transition-colors">
+            <i class="fa-solid fa-globe"></i>
+          </div>
+          <div class="flex-1 text-left">
+            <div class="flex items-center justify-between">
+              <span class="text-[12px] font-black tracking-wide text-white group-hover:text-emerald-200 transition">PROFESYONEL WEB SİTESİ TASARIMI</span>
+              <span class="text-[9px] font-extrabold bg-u8-red text-white px-2 py-0.5 rounded-full uppercase tracking-wider">Premium</span>
+            </div>
+            <p class="text-[10.5px] text-slate-200 mt-1 leading-snug">
+              Modern, %100 mobil uyumlu, Google SEO odaklı, hızlı ve kurumsal kimliğinizi yansıtan yüksek dönüşümlü web siteleri tasarlıyoruz.
+            </p>
+            <div class="mt-2 flex items-center gap-2 text-[10px] font-bold text-emerald-300">
+              <span>Hemen İnceleyin & Bilgi Alın</span>
+              <i class="fa-solid fa-arrow-right text-[9px] group-hover:translate-x-1 transition"></i>
+            </div>
+          </div>
+        </div>
+      </a>
+
+      <!-- 4 Original Logo Spheres (Görseldeki 4 Küre) -->
+      <div class="grid grid-cols-2 gap-2.5">
+        
+        <!-- Sphere 1: Dijital Pazarlama ve Reklam -->
+        <div class="sphere-icon p-3 rounded-2xl flex items-center gap-2.5 border border-slate-200 hover:border-u8-red/50 transition">
+          <div class="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center bg-white sphere-ring-red shadow-sm text-u8-red">
+            <i class="fa-solid fa-bullhorn text-xs"></i>
+          </div>
+          <div class="text-left">
+            <h3 class="text-[10.5px] font-black leading-tight text-slate-900">DİJİTAL PAZARLAMA</h3>
+            <p class="text-[9.5px] text-slate-500 font-bold leading-tight">ve Reklam Yönetimi</p>
+          </div>
+        </div>
+
+        <!-- Sphere 2: Sosyal Medya Yönetimi -->
+        <div class="sphere-icon p-3 rounded-2xl flex items-center gap-2.5 border border-slate-200 hover:border-u8-green/50 transition">
+          <div class="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center bg-white sphere-ring-green shadow-sm text-u8-green">
+            <i class="fa-solid fa-hashtag text-xs"></i>
+          </div>
+          <div class="text-left">
+            <h3 class="text-[10.5px] font-black leading-tight text-slate-900">SOSYAL MEDYA</h3>
+            <p class="text-[9.5px] text-slate-500 font-bold leading-tight">İçerik & Hesap Yönetimi</p>
+          </div>
+        </div>
+
+        <!-- Sphere 3: Belgelendirme (ISO, CE vb.) -->
+        <div class="sphere-icon p-3 rounded-2xl flex items-center gap-2.5 border border-slate-200 hover:border-u8-red/50 transition">
+          <div class="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center bg-white sphere-ring-red shadow-sm text-u8-red">
+            <i class="fa-solid fa-award text-xs"></i>
+          </div>
+          <div class="text-left">
+            <h3 class="text-[10.5px] font-black leading-tight text-slate-900">BELGELENDİRME</h3>
+            <p class="text-[9.5px] text-slate-500 font-bold leading-tight">(ISO, CE, Kalite vb.)</p>
+          </div>
+        </div>
+
+        <!-- Sphere 4: Marka / Patent Tescil -->
+        <div class="sphere-icon p-3 rounded-2xl flex items-center gap-2.5 border border-slate-200 hover:border-u8-green/50 transition">
+          <div class="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center bg-white sphere-ring-green shadow-sm text-u8-green">
+            <i class="fa-solid fa-shield-halved text-xs"></i>
+          </div>
+          <div class="text-left">
+            <h3 class="text-[10.5px] font-black leading-tight text-slate-900">MARKA / PATENT</h3>
+            <p class="text-[9.5px] text-slate-500 font-bold leading-tight">Fikri Mülkiyet Tescili</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Social Media & Official Channels -->
+    <footer class="px-5 sm:px-6 py-4 bg-white text-center">
+      <p class="text-[10.5px] font-bold text-slate-400 uppercase tracking-widest mb-3">Resmi Sosyal Medya & Web Adreslerimiz</p>
+      
+      <div class="flex items-center justify-center gap-2.5">
+        <!-- Web Site -->
+        <a href="https://u8belgelendirme.com/" target="_blank" rel="noopener noreferrer" title="Resmi Web Sitesi" class="interactive-btn w-11 h-11 rounded-2xl bg-u8-green text-white flex items-center justify-center text-lg shadow-sm hover:bg-u8-greenLight">
+          <i class="fa-solid fa-globe"></i>
+        </a>
+        <!-- Instagram -->
+        <a href="https://www.instagram.com/u8danismanlik/" target="_blank" rel="noopener noreferrer" title="Instagram" class="interactive-btn w-11 h-11 rounded-2xl bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 text-white flex items-center justify-center text-lg shadow-sm">
+          <i class="fa-brands fa-instagram"></i>
+        </a>
+        <!-- LinkedIn -->
+        <a href="https://www.linkedin.com/company/u8danismanlik/" target="_blank" rel="noopener noreferrer" title="LinkedIn" class="interactive-btn w-11 h-11 rounded-2xl bg-[#0a66c2] text-white flex items-center justify-center text-lg shadow-sm hover:brightness-110">
+          <i class="fa-brands fa-linkedin-in"></i>
+        </a>
+        <!-- Facebook -->
+        <a href="https://www.facebook.com/u8danismanlik" target="_blank" rel="noopener noreferrer" title="Facebook" class="interactive-btn w-11 h-11 rounded-2xl bg-[#1877f2] text-white flex items-center justify-center text-lg shadow-sm hover:brightness-110">
+          <i class="fa-brands fa-facebook-f"></i>
+        </a>
+      </div>
+
+      <!-- Domain Footnote -->
+      <div class="mt-4 pt-3 border-t border-slate-100 flex flex-col items-center justify-center text-center gap-0.5">
+        <span class="text-[11px] font-extrabold text-slate-800">U8 Danışmanlık ve Ajans</span>
+        <a href="https://u8belgelendirme.com/" target="_blank" rel="noopener noreferrer" class="text-[11px] text-u8-red font-bold hover:underline flex items-center gap-1">
+          <span>u8belgelendirme.com</span>
+          <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <!-- Şifre Korumalı Logo Yönetici Modalı -->
+  <div id="admin-modal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden items-center justify-center p-4 transition-all duration-300" onclick="if(event.target === this) closeAdminModal()">
+    <div class="bg-white rounded-3xl p-6 max-w-sm w-full text-center shadow-2xl relative" onclick="event.stopPropagation()">
+      <button type="button" onclick="closeAdminModal()" class="interactive-btn absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 text-slate-600 hover:text-slate-900 flex items-center justify-center font-bold text-sm">
+        ✕
+      </button>
+
+      <div class="w-12 h-12 mx-auto rounded-2xl bg-rose-100 text-u8-red flex items-center justify-center text-xl mb-2">
+        <i class="fa-solid fa-shield-halved"></i>
+      </div>
+
+      <h3 class="text-base font-extrabold text-slate-900">Yönetici Logo Paneli</h3>
+      <p class="text-xs text-slate-500 mb-3">Logoyu yalnızca yetkili yöneticiler değiştirebilir. Lütfen PIN giriniz:</p>
+
+      <div class="mb-3">
+        <input type="password" id="admin-pin-input" maxlength="8" placeholder="••••" class="w-full text-center py-2.5 px-3 bg-slate-50 border border-slate-300 rounded-xl text-lg font-bold tracking-[0.4em] text-slate-800 focus:outline-none focus:border-u8-red placeholder:text-slate-400 placeholder:tracking-normal">
+        <p id="admin-error-text" class="text-[11px] text-rose-600 font-bold mt-1.5 hidden">Hatalı şifre girdiniz!</p>
+      </div>
+
+      <div class="flex gap-2">
+        <button type="button" onclick="closeAdminModal()" class="interactive-btn w-1/2 py-2.5 bg-slate-100 text-slate-700 font-bold text-xs rounded-xl hover:bg-slate-200 transition">
+          Vazgeç
+        </button>
+        <button type="button" onclick="verifyAdminPassword()" class="interactive-btn w-1/2 py-2.5 bg-u8-red text-white font-bold text-xs rounded-xl hover:bg-u8-redDark transition flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-key text-[11px]"></i> Giriş & Yükle
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobil Uygulama Kurulum Rehberi Modalı -->
+  <div id="pwa-guide-modal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden items-center justify-center p-4 transition-all duration-300" onclick="if(event.target === this) closePwaGuideModal()">
+    <div class="bg-white rounded-3xl p-6 max-w-sm w-full text-center shadow-2xl relative" onclick="event.stopPropagation()">
+      <button type="button" onclick="closePwaGuideModal()" class="interactive-btn absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 text-slate-600 hover:text-slate-900 flex items-center justify-center font-bold text-sm">
+        ✕
+      </button>
+
+      <div class="w-12 h-12 mx-auto rounded-2xl bg-emerald-100 text-u8-green flex items-center justify-center text-xl mb-2">
+        <i class="fa-solid fa-mobile-screen-button"></i>
+      </div>
+
+      <h3 class="text-base font-extrabold text-slate-900">Telefona Uygulama Olarak Ekle</h3>
+      <p class="text-xs text-slate-500 mb-4">Kartvizitinizi tek tıkla ana ekranınıza uygulama simgesi olarak ekleyebilirsiniz:</p>
+
+      <div class="text-left bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80 text-xs space-y-2 mb-4">
+        <div class="flex items-start gap-2">
+          <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-[10px] flex-shrink-0">1</span>
+          <p><strong class="text-slate-800">iPhone (Safari):</strong> Alttaki <strong>Paylaş</strong> <i class="fa-solid fa-arrow-up-from-bracket text-blue-600"></i> simgesine basıp <strong>"Ana Ekrana Ekle"</strong>yi seçin.</p>
+        </div>
+        <div class="flex items-start gap-2">
+          <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-[10px] flex-shrink-0">2</span>
+          <p><strong class="text-slate-800">Android (Chrome):</strong> Sağ üstteki <strong>üç nokta</strong> <i class="fa-solid fa-ellipsis-vertical text-slate-600"></i> simgesine basıp <strong>"Uygulamayı Yükle"</strong>yi seçin.</p>
+        </div>
+      </div>
+
+      <button type="button" onclick="closePwaGuideModal()" class="interactive-btn w-full py-2.5 bg-u8-green text-white font-bold text-xs rounded-xl hover:bg-u8-greenLight transition">
+        Anladım
+      </button>
+    </div>
+  </div>
+
+  <!-- Interactive QR Code Modal -->
+  <div id="qr-modal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden items-center justify-center p-4 transition-all duration-300" onclick="if(event.target === this) hideQrModal()">
+    <div class="bg-white rounded-3xl p-6 max-w-sm w-full text-center shadow-2xl relative" onclick="event.stopPropagation()">
+      <button id="qr-close-btn" type="button" onclick="hideQrModal()" class="interactive-btn absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 text-slate-600 hover:text-slate-900 flex items-center justify-center font-bold text-sm">
+        ✕
+      </button>
+
+      <div class="w-12 h-12 mx-auto rounded-2xl bg-emerald-100 text-u8-green flex items-center justify-center text-xl mb-2">
+        <i class="fa-solid fa-qrcode"></i>
+      </div>
+
+      <h3 class="text-base font-extrabold text-slate-900" id="qr-modal-name">Rezzan Çağıl Lama</h3>
+      <p class="text-xs text-slate-500 mb-3">Telefon kameranızla okutarak bu kartviziti ve iletişim bilgilerini anında açın</p>
+
+      <!-- QR Code Canvas / Img Container -->
+      <div class="flex flex-col items-center justify-center p-4 bg-slate-50 rounded-2xl border border-slate-200/80 mb-4 shadow-inner min-h-[220px]">
+        <div id="qrcode-canvas" class="flex items-center justify-center"></div>
+      </div>
+
+      <div class="flex gap-2">
+        <button id="qr-modal-cancel" type="button" onclick="hideQrModal()" class="interactive-btn w-full py-2.5 bg-slate-100 text-slate-700 font-bold text-xs rounded-xl hover:bg-slate-200 transition">
+          Kapat
+        </button>
+        <button id="qr-copy-link-btn" type="button" onclick="copyCardLink()" class="interactive-btn w-full py-2.5 bg-u8-green text-white font-bold text-xs rounded-xl hover:bg-u8-greenLight transition flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-link text-[11px]"></i> Link Kopyala
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Box -->
+  <div id="toast" class="fixed bottom-6 z-50 left-1/2 -translate-x-1/2 bg-slate-900/95 text-white text-xs font-semibold px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+    <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400"></i>
+    <span id="toast-message">İşlem Tamamlandı</span>
+  </div>
+
+  <!-- JavaScript Implementation -->
+  <script>
+    // Profile Models
+    const profiles = {
+      rezzan: {
+        id: 'rezzan',
+        name: 'Rezzan Çağıl Lama',
+        title: 'General Manager',
+        phoneRaw: '05515061912',
+        phoneFormatted: '0 551 506 19 12',
+        phoneE164: '+905515061912',
+        email: 'info@u8belgelendirme.com',
+        avatarText: 'RÇ',
+        avatarBg: 'from-u8-green to-u8-greenDark',
+        website: 'https://u8belgelendirme.com/'
+      },
+      busra: {
+        id: 'busra',
+        name: 'Büşra Yağar',
+        title: 'Planning & Operations Manager',
+        phoneRaw: '05053363594',
+        phoneFormatted: '0 505 336 35 94',
+        phoneE164: '+905053363594',
+        email: 'info@u8belgelendirme.com',
+        avatarText: 'BY',
+        avatarBg: 'from-u8-red to-u8-redDark',
+        website: 'https://u8belgelendirme.com/'
+      }
+    };
+
+    let currentProfile = profiles.rezzan;
+    let qrCodeInstance = null;
+    let toastTimeout;
+    const ADMIN_PASS = "1912"; // Şifreniz (İstediğiniz zaman buradan değiştirebilirsiniz)
+
+    // --- PWA (Mobil Uygulama) Dahili Manifest & Service Worker Motoru ---
+    (function initPWA() {
+      // 1. Dinamik Web App Manifest'i Data-URI olarak oluştur
+      const pwaManifest = {
+        name: "U8 Danışmanlık ve Ajans",
+        short_name: "U8 Danışmanlık",
+        description: "U8 Danışmanlık ve Ajans Resmi Dijital Kartvizit Uygulaması",
+        start_url: "./",
+        display: "standalone",
+        background_color: "#0e2418",
+        theme_color: "#1b3b2b",
+        orientation: "portrait-primary",
+        icons: [
+          {
+            src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 160'%3E%3Crect width='160' height='160' rx='36' fill='%231b3b2b'/%3E%3Ctext x='80' y='108' font-size='72' font-family='serif' font-weight='900' fill='%23ffffff' text-anchor='middle'%3EU8%3C/text%3E%3C/svg%3E",
+            sizes: "192x192",
+            type: "image/svg+xml",
+            purpose: "any maskable"
+          },
+          {
+            src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 160'%3E%3Crect width='160' height='160' rx='36' fill='%2388001b'/%3E%3Ctext x='80' y='108' font-size='72' font-family='serif' font-weight='900' fill='%23ffffff' text-anchor='middle'%3EU8%3C/text%3E%3C/svg%3E",
+            sizes: "512x512",
+            type: "image/svg+xml",
+            purpose: "any maskable"
+          }
+        ]
+      };
+
+      const manifestBlob = new Blob([JSON.stringify(pwaManifest)], { type: 'application/manifest+json' });
+      const manifestUrl = URL.createObjectURL(manifestBlob);
+      const manifestLink = document.getElementById('manifest-placeholder');
+      if (manifestLink) {
+        manifestLink.setAttribute('href', manifestUrl);
+      }
+
+      // 2. Çevrimdışı destek ve PWA tanınması için Inline Service Worker
+      if ('serviceWorker' in navigator) {
+        const swCode = `
+          self.addEventListener('install', (e) => {
+            self.skipWaiting();
+          });
+          self.addEventListener('activate', (e) => {
+            e.waitUntil(clients.claim());
+          });
+          self.addEventListener('fetch', (e) => {
+            // Ağ öncelikli önbellekleme
+            e.respondWith(
+              fetch(e.request).catch(() => caches.match(e.request))
+            );
+          });
+        `;
+        const swBlob = new Blob([swCode], { type: 'application/javascript' });
+        const swUrl = URL.createObjectURL(swBlob);
+        navigator.serviceWorker.register(swUrl).catch((err) => {
+          // Geliştirici veya iframe ortamında normal uyarı
+          console.debug('PWA ServiceWorker durumu:', err.message);
+        });
+      }
+    })();
+
+    // Admin Şifre Kontrolleri
+    function openAdminPasswordModal() {
+      const modal = document.getElementById('admin-modal');
+      const pinInput = document.getElementById('admin-pin-input');
+      const errorText = document.getElementById('admin-error-text');
+      
+      pinInput.value = '';
+      errorText.classList.add('hidden');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      pinInput.focus();
+    }
+
+    function closeAdminModal() {
+      const modal = document.getElementById('admin-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function verifyAdminPassword() {
+      const pinInput = document.getElementById('admin-pin-input');
+      const errorText = document.getElementById('admin-error-text');
+      
+      if (pinInput.value.trim() === ADMIN_PASS) {
+        closeAdminModal();
+        showToast('Yetki doğrulandı! Logo seçiniz...', 'fa-unlock text-emerald-400');
+        // Şifre doğruysa gizli dosya seçiciyi aç
+        document.getElementById('admin-logo-upload').click();
+      } else {
+        errorText.classList.remove('hidden');
+        pinInput.classList.add('border-rose-500');
+      }
+    }
+
+    // PWA Mobil Uygulama Kurulum Rehberi
+    let deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      // İndirme butonunun dikkat çekmesini sağla
+      const installBtn = document.getElementById('install-app-btn');
+      if (installBtn) {
+        installBtn.classList.add('ring-2', 'ring-emerald-500', 'bg-emerald-50');
+      }
+    });
+
+    function promptInstallPWA() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choice) => {
+          if (choice.outcome === 'accepted') {
+            showToast('U8 Uygulaması telefonunuza eklendi!');
+          }
+          deferredPrompt = null;
+        });
+      } else {
+        // iOS veya otomatik tetiklenmeyen tarayıcılar için rehber penceresini aç
+        const pwaModal = document.getElementById('pwa-guide-modal');
+        pwaModal.classList.remove('hidden');
+        pwaModal.classList.add('flex');
+      }
+    }
+
+    function closePwaGuideModal() {
+      const pwaModal = document.getElementById('pwa-guide-modal');
+      pwaModal.classList.add('hidden');
+      pwaModal.classList.remove('flex');
+    }
+
+    // Toast Alert Helper
+    function showToast(msg, iconClass = 'fa-circle-check text-emerald-400') {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-message');
+      const toastIcon = document.getElementById('toast-icon');
+
+      if (!toast || !toastMsg) return;
+
+      toastMsg.textContent = msg;
+      toastIcon.className = `fa-solid ${iconClass}`;
+
+      clearTimeout(toastTimeout);
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-24', 'opacity-0');
+      }, 3000);
+    }
+
+    // Switch Profile Function
+    function setProfile(key) {
+      if (!profiles[key]) return;
+      currentProfile = profiles[key];
+
+      const btnRezzan = document.getElementById('tab-rezzan-btn');
+      const btnBusra = document.getElementById('tab-busra-btn');
+
+      if (key === 'rezzan') {
+        btnRezzan.className = 'interactive-btn w-1/2 py-2.5 px-2 rounded-xl text-xs sm:text-sm font-bold tracking-tight flex items-center justify-center gap-2 tab-active';
+        btnBusra.className = 'interactive-btn w-1/2 py-2.5 px-2 rounded-xl text-xs sm:text-sm font-bold tracking-tight flex items-center justify-center gap-2 tab-inactive';
+      } else {
+        btnBusra.className = 'interactive-btn w-1/2 py-2.5 px-2 rounded-xl text-xs sm:text-sm font-bold tracking-tight flex items-center justify-center gap-2 tab-active';
+        btnRezzan.className = 'interactive-btn w-1/2 py-2.5 px-2 rounded-xl text-xs sm:text-sm font-bold tracking-tight flex items-center justify-center gap-2 tab-inactive';
+      }
+
+      // Update Card Visuals
+      document.getElementById('person-name').textContent = currentProfile.name;
+      document.getElementById('person-title').textContent = currentProfile.title;
+      document.getElementById('person-phone-display').textContent = currentProfile.phoneFormatted;
+
+      const avatar = document.getElementById('person-avatar');
+      avatar.textContent = currentProfile.avatarText;
+      avatar.className = `w-20 h-20 sm:w-22 sm:h-22 mx-auto rounded-3xl bg-gradient-to-br ${currentProfile.avatarBg} text-white flex items-center justify-center text-2xl font-black shadow-lg border-4 border-white transition-all`;
+
+      // Update Call & WhatsApp Links
+      document.getElementById('btn-call').href = `tel:${currentProfile.phoneE164}`;
+      const waText = encodeURIComponent(`Merhaba ${currentProfile.name}, U8 Danışmanlık ve Ajans hizmetleriniz (Profesyonel Web Tasarımı, Reklam, Belgelendirme vb.) hakkında bilgi almak istiyorum.`);
+      document.getElementById('btn-whatsapp').href = `https://wa.me/${currentProfile.phoneRaw.replace(/^0/, '90')}?text=${waText}`;
+
+      showToast(`${currentProfile.name} seçildi`);
+    }
+
+    // Direct vCard (.vcf) Generator
+    function handleDownloadVCard() {
+      try {
+        const nameParts = currentProfile.name.trim().split(/\s+/);
+        const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : '';
+        const firstName = nameParts.length > 1 ? nameParts.slice(0, -1).join(' ') : nameParts[0];
+
+        const vcardContent = [
+          'BEGIN:VCARD',
+          'VERSION:3.0',
+          `N;CHARSET=UTF-8:${lastName};${firstName};;;`,
+          `FN;CHARSET=UTF-8:${currentProfile.name}`,
+          `ORG;CHARSET=UTF-8:U8 Danışmanlık ve Ajans`,
+          `TITLE;CHARSET=UTF-8:${currentProfile.title}`,
+          `TEL;TYPE=CELL,VOICE,PREF:${currentProfile.phoneE164}`,
+          `EMAIL;TYPE=WORK,INTERNET:${currentProfile.email}`,
+          `URL:${currentProfile.website}`,
+          `NOTE;CHARSET=UTF-8:U8 Danışmanlık ve Ajans: Profesyonel Web Sitesi Tasarımı, Dijital Pazarlama ve Reklam, Sosyal Medya Yönetimi, Belgelendirme (ISO, CE) ve Marka/Patent Tescili.`,
+          'END:VCARD'
+        ].join('\r\n');
+
+        const blob = new Blob([vcardContent], { type: 'text/vcard;charset=utf-8;' });
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const tempLink = document.createElement('a');
+        tempLink.href = downloadUrl;
+        const fileSlug = currentProfile.name.toLowerCase().replace(/[^a-z0-9]/g, '_');
+        tempLink.setAttribute('download', `${fileSlug}_u8.vcf`);
+        document.body.appendChild(tempLink);
+        tempLink.click();
+        document.body.removeChild(tempLink);
+        window.URL.revokeObjectURL(downloadUrl);
+
+        showToast('Kişi kartı (.vcf) indirildi. Rehbere ekleyebilirsiniz!');
+      } catch (err) {
+        console.error(err);
+        showToast('Kişi kartı indirilemedi, lütfen tekrar deneyin.');
+      }
+    }
+
+    // Copy Current Phone
+    function copyCurrentPhone() {
+      copyStringToClipboard(currentProfile.phoneFormatted, `Telefon kopyalandı: ${currentProfile.phoneFormatted}`);
+    }
+
+    // Copy Card Link
+    function copyCardLink() {
+      copyStringToClipboard(window.location.href, 'Kartvizit linki kopyalandı!');
+      hideQrModal();
+    }
+
+    // Clipboard Copy Utility
+    function copyStringToClipboard(text, successMsg) {
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(() => {
+          showToast(successMsg);
+        }).catch(() => {
+          fallbackClipboard(text, successMsg);
+        });
+      } else {
+        fallbackClipboard(text, successMsg);
+      }
+    }
+
+    function fallbackClipboard(text, successMsg) {
+      const tempInput = document.createElement('textarea');
+      tempInput.value = text;
+      tempInput.style.position = 'fixed';
+      tempInput.style.left = '-9999px';
+      tempInput.style.top = '-9999px';
+      document.body.appendChild(tempInput);
+      tempInput.focus();
+      tempInput.select();
+      try {
+        document.execCommand('copy');
+        showToast(successMsg);
+      } catch (err) {
+        showToast('Kopyalanamadı, lütfen manuel kopyalayın.');
+      }
+      document.body.removeChild(tempInput);
+    }
+
+    // QR Modal Controllers
+    function showQrModal() {
+      const modal = document.getElementById('qr-modal');
+      const nameElem = document.getElementById('qr-modal-name');
+      const qrContainer = document.getElementById('qrcode-canvas');
+
+      nameElem.textContent = `${currentProfile.name} • ${currentProfile.title}`;
+      qrContainer.innerHTML = '';
+
+      // iPhone iOS Kamera uygulamasıyla %100 uyumlu vCard 3.0 standardı:
+      // iOS özellikle N alanında Soyadı;Adı;;; ayrımını ve FN alanını kesin bekler.
+      const nameParts = currentProfile.name.trim().split(/\s+/);
+      const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : '';
+      const firstName = nameParts.length > 1 ? nameParts.slice(0, -1).join(' ') : nameParts[0];
+
+      const vcardQR = [
+        'BEGIN:VCARD',
+        'VERSION:3.0',
+        `N:${lastName};${firstName};;;`,
+        `FN:${currentProfile.name}`,
+        'ORG:U8 Danışmanlık ve Ajans',
+        `TITLE:${currentProfile.title}`,
+        `TEL;TYPE=CELL,VOICE:${currentProfile.phoneE164}`,
+        `EMAIL;TYPE=INTERNET,WORK:${currentProfile.email}`,
+        `URL:${currentProfile.website}`,
+        'END:VCARD'
+      ].join('\r\n');
+
+      // 1. Birincil Yöntem: Tarayıcı içi QRCode kütüphanesini dene
+      let qrSuccess = false;
+      if (typeof QRCode !== 'undefined') {
+        try {
+          qrCodeInstance = new QRCode(qrContainer, {
+            text: vcardQR,
+            width: 200,
+            height: 200,
+            colorDark: "#1b3b2b",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.M
+          });
+          qrSuccess = true;
+        } catch (e) {
+          console.warn('QRCode JS render hatası, alternatif API tetikleniyor...', e);
+          qrSuccess = false;
+        }
+      }
+
+      // 2. Yedekleme Yöntemi: Eğer harici JS kütüphanesi engellendiyse anında çalışan yüksek çözünürlüklü QR motoru
+      if (!qrSuccess || !qrContainer.hasChildNodes()) {
+        const encodedData = encodeURIComponent(vcardQR);
+        const qrImg = document.createElement('img');
+        qrImg.alt = `${currentProfile.name} Karekod`;
+        qrImg.className = 'w-52 h-52 rounded-xl shadow-sm bg-white p-2 border border-slate-200';
+        qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${encodedData}&color=1b3b2b&bgcolor=ffffff&margin=1&charset-source=UTF-8`;
+        
+        qrImg.onerror = function() {
+          this.src = `https://quickchart.io/qr?text=${encodedData}&size=280&dark=1b3b2b&light=ffffff&margin=1`;
+        };
+
+        qrContainer.innerHTML = '';
+        qrContainer.appendChild(qrImg);
+      }
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function hideQrModal() {
+      const modal = document.getElementById('qr-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    // Save as Image Feature
+    function handleDownloadCardImage() {
+      showToast('Kartvizit görseli hazırlanıyor...', 'fa-spinner fa-spin text-amber-400');
+      const cardEl = document.getElementById('card-to-export');
+      
+      html2canvas(cardEl, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: null
+      }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = `U8_Danismanlik_${currentProfile.name.replace(/\s+/g, '_')}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        showToast('Görsel telefonunuza indirildi!');
+      }).catch(err => {
+        console.error(err);
+        showToast('Görsel oluşturulurken bir hata oluştu.');
+      });
+    }
+
+    // Logo Upload & Customization (Sadece sizin kontrolünüzde, tarayıcıda saklanır)
+    function handleCustomLogoUpload(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const customImg = document.getElementById('custom-logo-img');
+        const vectorBlock = document.getElementById('vector-logo-block');
+        const resetBtn = document.getElementById('reset-logo-btn');
+
+        customImg.src = e.target.result;
+        customImg.classList.remove('hidden');
+        vectorBlock.classList.add('hidden');
+        resetBtn.classList.remove('hidden');
+
+        try {
+          localStorage.setItem('u8_custom_logo', e.target.result);
+        } catch(e) {
+          console.warn('Storage full or blocked');
+        }
+
+        showToast('Özel logo başarıyla yüklendi!');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function resetToVectorLogo() {
+      const customImg = document.getElementById('custom-logo-img');
+      const vectorBlock = document.getElementById('vector-logo-block');
+      const resetBtn = document.getElementById('reset-logo-btn');
+
+      customImg.src = '';
+      customImg.classList.add('hidden');
+      vectorBlock.classList.remove('hidden');
+      resetBtn.classList.add('hidden');
+
+      localStorage.removeItem('u8_custom_logo');
+      showToast('Orijinal U8 vektör logoya dönüldü');
+    }
+
+    // Load saved logo from localStorage if available
+    window.addEventListener('DOMContentLoaded', () => {
+      try {
+        const savedLogo = localStorage.getItem('u8_custom_logo');
+        if (savedLogo) {
+          const customImg = document.getElementById('custom-logo-img');
+          const vectorBlock = document.getElementById('vector-logo-block');
+          const resetBtn = document.getElementById('reset-logo-btn');
+
+          customImg.src = savedLogo;
+          customImg.classList.remove('hidden');
+          vectorBlock.classList.add('hidden');
+          resetBtn.classList.remove('hidden');
+        }
+      } catch(e) {}
+
+      // URL parameter check (e.g. ?person=busra)
+      const urlParams = new URLSearchParams(window.location.search);
+      const personQuery = urlParams.get('person');
+      if (personQuery && profiles[personQuery.toLowerCase()]) {
+        setProfile(personQuery.toLowerCase());
+      }
+    });
+  </script>
+</body>
+</html>
