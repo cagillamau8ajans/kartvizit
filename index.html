@@ -11,8 +11,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="U8 Danışmanlık" />
 
-  <!-- PWA Manifest -->
-  <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22U8%20Dan%C4%B1%C5%9Fmanl%C4%B1k%20ve%20Ajans%22%2C%22short_name%22%3A%22U8%20Dan%C4%B1%C5%9Fmanl%C4%B1k%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230d1b14%22%2C%22theme_color%22%3A%22%231b3b2b%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20512%20512'%3E%3Crect%20width%3D'512'%20height%3D'512'%20rx%3D'120'%20fill%3D'%231b3b2b'%2F%3E%3Ctext%20x%3D'50%25'%20y%3D'58%25'%20font-size%3D'260'%20text-anchor%3D'middle'%20fill%3D'%23ffffff'%20font-family%3D'serif'%20font-weight%3D'bold'%3EU8%3C%2Ftext%3E%3C%2Fsvg%3E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D" />
+  <!-- Ayrı Manifest Dosyası Bağlantısı -->
+  <link rel="manifest" href="manifest.json" />
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -242,7 +242,6 @@
       font-size: 12px;
     }
 
-    /* Akılda Kalıcı & Kolay Uygulama Yükleme Banner'ı */
     .app-install-banner {
       background: linear-gradient(135deg, rgba(194, 155, 56, 0.15), rgba(27, 59, 43, 0.5));
       border: 1px solid rgba(194, 155, 56, 0.4);
@@ -446,7 +445,6 @@
       transform: translateY(-2px);
     }
 
-    /* Modal Stilleri */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -589,7 +587,6 @@
       </div>
     </div>
 
-    <!-- Müşteriyi Teşvik Eden ve Akılda Kalmayı Sağlayan Buton -->
     <div class="app-install-banner" onclick="installAppDirectly()">
       <div class="banner-text-wrap">
         <div class="banner-title">
@@ -693,7 +690,6 @@
     </div>
   </div>
 
-  <!-- Kolaylaştırılmış ve Görsel Adımlı Yükleme Rehberi -->
   <div class="modal-overlay" id="appModal">
     <div class="modal-card">
       <button class="modal-close" onclick="closeAppModal()"><i class="fa-solid fa-xmark"></i></button>
@@ -758,15 +754,16 @@
     let currentProfileIndex = 0;
     let deferredPrompt = null;
 
-    // Service Worker Kaydı (Android ve Samsung PWA motoru için)
+    // Harici sw.js Dosyasını Kaydetme (Modern PWA Yükleme Motoru)
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('data:text/javascript;base64,c2VsZi5hZGRFdmVudExpc3RlbmVyKCdmZXRjaCcsIGZ1bmN0aW9uKGV2ZW50KSB7fSk7')
-          .then(() => console.log('PWA Service Worker Aktif'))
-          .catch(err => console.log(err));
+        navigator.serviceWorker.register('sw.js')
+          .then(() => console.log('Service Worker bağlandı.'))
+          .catch(err => console.log('SW hatası:', err));
       });
     }
 
+    // Tarayıcının resmi kurulum istemini yakalama
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
