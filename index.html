@@ -10,19 +10,15 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="U8 Danışmanlık" />
 
-  <!-- Dinamik Web App Manifest (PWA) -->
   <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22U8%20Dan%C4%B1%C5%9Fmanl%C4%B1k%20ve%20Ajans%22%2C%22short_name%22%3A%22U8%20Dan%C4%B1%C5%9Fmanl%C4%B1k%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230d1b14%22%2C%22theme_color%22%3A%22%231b3b2b%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20512%20512'%3E%3Crect%20width%3D'512'%20height%3D'512'%20rx%3D'120'%20fill%3D'%231b3b2b'%2F%3E%3Ctext%20x%3D'50%25'%20y%3D'58%25'%20font-size%3D'260'%20text-anchor%3D'middle'%20fill%3D'%23ffffff'%20font-family%3D'serif'%20font-weight%3D'bold'%3EU8%3C%2Ftext%3E%3C%2Fsvg%3E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D" />
 
-  <!-- Font Awesome İkonları -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,800;1,600&display=swap" rel="stylesheet" />
 
   <style>
     :root {
-      --primary-dark: #0d1e16;
       --primary-green: #1b3b2b;
       --accent-gold: #c29b38;
       --accent-burgundy: #800020;
@@ -55,7 +51,7 @@
     .container {
       width: 100%;
       max-width: 440px;
-      background: rgba(13, 27, 20, 0.85);
+      background: rgba(13, 27, 20, 0.88);
       backdrop-filter: blur(25px);
       -webkit-backdrop-filter: blur(25px);
       border: 1px solid var(--glass-border);
@@ -113,7 +109,6 @@
       transform: translateY(-2px);
     }
 
-    /* Logo Alanı */
     .brand-section {
       text-align: center;
       padding: 12px 20px 16px;
@@ -123,11 +118,6 @@
       width: 140px;
       margin: 0 auto 10px;
       cursor: pointer;
-      transition: transform 0.3s;
-    }
-
-    .logo-box:hover {
-      transform: scale(1.02);
     }
 
     .logo-svg {
@@ -153,7 +143,6 @@
       color: var(--accent-gold);
     }
 
-    /* Sekme Değiştirici */
     .tab-switch {
       display: flex;
       background: rgba(0, 0, 0, 0.3);
@@ -182,10 +171,9 @@
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     }
 
-    /* Profil Alanı */
     .profile-card {
       text-align: center;
-      padding: 0 20px 20px;
+      padding: 0 20px 16px;
     }
 
     .profile-avatar-wrap {
@@ -225,25 +213,38 @@
       margin-bottom: 12px;
     }
 
-    .profile-phone-badge {
+    .info-chips {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .info-chip {
       display: inline-flex;
       align-items: center;
       gap: 8px;
       background: rgba(255, 255, 255, 0.06);
-      padding: 6px 14px;
+      padding: 7px 16px;
       border-radius: 30px;
       border: 1px solid var(--glass-border);
       font-size: 13px;
       font-weight: 600;
       color: #cbd5e1;
+      text-decoration: none;
     }
 
-    /* Ana Eylem Butonları (Grid) */
+    .info-chip.mail-chip {
+      color: #93c5fd;
+      font-size: 12px;
+    }
+
     .quick-actions {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
       gap: 8px;
-      padding: 0 20px 20px;
+      padding: 12px 20px 20px;
     }
 
     .action-tile {
@@ -276,7 +277,6 @@
       letter-spacing: 0.3px;
     }
 
-    /* Rehbere Kaydet Butonu */
     .save-vcard-wrap {
       padding: 0 20px 24px;
     }
@@ -296,23 +296,18 @@
       gap: 10px;
       cursor: pointer;
       box-shadow: 0 10px 25px rgba(27, 59, 43, 0.4);
-      transition: transform 0.2s, box-shadow 0.2s;
+      transition: transform 0.2s;
     }
 
     .btn-vcard:hover {
       transform: translateY(-2px);
-      box-shadow: 0 14px 30px rgba(27, 59, 43, 0.6);
     }
 
-    /* Hizmetler Bölümü */
     .services-section {
       padding: 0 20px;
     }
 
     .section-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
       margin-bottom: 14px;
     }
 
@@ -371,7 +366,6 @@
       line-height: 1.4;
     }
 
-    /* Sosyal Medya */
     .social-links {
       display: flex;
       justify-content: center;
@@ -400,13 +394,9 @@
       transform: translateY(-2px);
     }
 
-    /* Modal Stilleri (QR & Bilgilendirme) */
     .modal-overlay {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0, 0, 0, 0.85);
       backdrop-filter: blur(10px);
       display: flex;
@@ -453,7 +443,6 @@
       border-radius: 16px;
       display: inline-block;
       margin: 16px auto;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
     }
 
     .qr-container img {
@@ -476,9 +465,8 @@
 </head>
 <body>
 
-  <div class="container" id="cardContainer">
+  <div class="container">
     
-    <!-- Üst Eylemler -->
     <div class="top-actions">
       <div class="pill-badge">
         <i class="fa-solid fa-circle-check" style="color: #4ade80;"></i>
@@ -486,16 +474,13 @@
       </div>
       <div class="action-icons">
         <button class="icon-btn" onclick="openQrModal()" title="Karekod"><i class="fa-solid fa-qrcode"></i></button>
-        <!-- Artık Görsel İndirmez; Doğrudan Uygulama Kurulumunu Tetikler -->
-        <button class="icon-btn" onclick="installAppDirectly()" title="Telefona Uygulama Olarak Yükle"><i class="fa-solid fa-cloud-arrow-down"></i></button>
-        <button class="icon-btn" onclick="openPinModal()" title="Logo Ayarı"><i class="fa-solid fa-lock"></i></button>
+        <button class="icon-btn" onclick="installAppDirectly()" title="Uygulama Olarak Yükle"><i class="fa-solid fa-cloud-arrow-down"></i></button>
+        <button class="icon-btn" onclick="openPinModal()" title="Logo Yönetimi"><i class="fa-solid fa-lock"></i></button>
       </div>
     </div>
 
-    <!-- Marka & Logo -->
     <div class="brand-section">
       <div class="logo-box" onclick="openPinModal()">
-        <!-- Orijinal U8 Vektörel Logosu -->
         <svg class="logo-svg" viewBox="0 0 200 120" fill="none" xmlns="http://www.w3.org/2000/svg">
           <text x="50" y="88" font-family="'Playfair Display', Georgia, serif" font-size="96" font-weight="800" fill="#1b3b2b" letter-spacing="-3">U</text>
           <text x="82" y="98" font-family="'Playfair Display', Georgia, serif" font-size="94" font-weight="900" fill="#800020" letter-spacing="-2">8</text>
@@ -505,27 +490,31 @@
       <p class="brand-subtitle">VE AJANS HİZMETLERİ</p>
     </div>
 
-    <!-- Profil Değiştirme Sekmesi -->
     <div class="tab-switch">
       <button class="tab-btn active" id="tab0" onclick="switchProfile(0)">Rezzan Çağıl Lama</button>
       <button class="tab-btn" id="tab1" onclick="switchProfile(1)">Büşra Yağar</button>
     </div>
 
-    <!-- Profil Detayı -->
     <div class="profile-card">
       <div class="profile-avatar-wrap">
         <div class="profile-avatar" id="avatarInitial">R</div>
       </div>
       <h2 class="profile-name" id="profileName">Rezzan Çağıl Lama</h2>
       <p class="profile-title" id="profileTitle">General Manager</p>
-      <div class="profile-phone-badge" onclick="copyPhone()">
-        <i class="fa-solid fa-phone"></i>
-        <span id="profilePhoneText">0 551 506 19 12</span>
-        <i class="fa-regular fa-copy" style="font-size: 11px; margin-left: 4px;"></i>
+      
+      <div class="info-chips">
+        <div class="info-chip" onclick="copyPhone()" style="cursor: pointer;">
+          <i class="fa-solid fa-phone"></i>
+          <span id="profilePhoneText">0 551 506 19 12</span>
+          <i class="fa-regular fa-copy" style="font-size: 11px;"></i>
+        </div>
+        <a href="mailto:cagillama@u8belgelendirme.com" id="profileMailChip" class="info-chip mail-chip">
+          <i class="fa-solid fa-envelope"></i>
+          <span id="profileMailText">cagillama@u8belgelendirme.com</span>
+        </a>
       </div>
     </div>
 
-    <!-- 5'li Eylem Izgarası (Düzeltilmiş Mail Adresleriyle) -->
     <div class="quick-actions">
       <a href="tel:05515061912" id="btnCall" class="action-tile">
         <i class="fa-solid fa-phone"></i>
@@ -535,7 +524,6 @@
         <i class="fa-brands fa-whatsapp"></i>
         <span>WhatsApp</span>
       </a>
-      <!-- Güncellenmiş Mail Bağlantısı -->
       <a href="mailto:cagillama@u8belgelendirme.com" id="btnMail" class="action-tile">
         <i class="fa-solid fa-envelope"></i>
         <span>E-Posta</span>
@@ -550,7 +538,6 @@
       </a>
     </div>
 
-    <!-- Rehbere Kaydet Butonu -->
     <div class="save-vcard-wrap">
       <button class="btn-vcard" onclick="downloadVCard()">
         <i class="fa-solid fa-address-card"></i>
@@ -558,13 +545,11 @@
       </button>
     </div>
 
-    <!-- Hizmet Alanları Vitrini -->
     <div class="services-section">
       <div class="section-head">
         <span class="section-title">Hizmet Alanlarımız</span>
       </div>
       <div class="services-grid">
-        <!-- Vurgulanan Web Tasarım Kartı -->
         <div class="service-card highlight">
           <div style="display: flex; align-items: center; gap: 8px;">
             <div class="service-icon-box"><i class="fa-solid fa-laptop-code"></i></div>
@@ -599,7 +584,6 @@
       </div>
     </div>
 
-    <!-- Sosyal Medya İkonları -->
     <div class="social-links">
       <a href="https://instagram.com" target="_blank" class="social-btn"><i class="fa-brands fa-instagram"></i></a>
       <a href="https://linkedin.com" target="_blank" class="social-btn"><i class="fa-brands fa-linkedin-in"></i></a>
@@ -609,7 +593,6 @@
 
   </div>
 
-  <!-- QR KOD MODALI -->
   <div class="modal-overlay" id="qrModal">
     <div class="modal-card">
       <button class="modal-close" onclick="closeQrModal()"><i class="fa-solid fa-xmark"></i></button>
@@ -620,16 +603,15 @@
         <img id="qrImage" src="" alt="Karekod" />
       </div>
       
-      <p style="font-size: 11px; color: #94a3b8;">iPhone veya Android kameranızı tutarak anında rehberinize kaydedebilirsiniz.</p>
+      <p style="font-size: 11px; color: #94a3b8;">Kameranızı tutarak anında rehberinize ekleyebilirsiniz.</p>
     </div>
   </div>
 
-  <!-- UYGULAMA YÜKLEME MODALI (Otomatik Yükleme Desteklenmeyen Tarayıcılar İçin) -->
   <div class="modal-overlay" id="appModal">
     <div class="modal-card">
       <button class="modal-close" onclick="closeAppModal()"><i class="fa-solid fa-xmark"></i></button>
       <i class="fa-solid fa-mobile-screen-button" style="font-size: 38px; color: var(--accent-gold); margin-bottom: 12px;"></i>
-      <h3 style="font-size: 17px; margin-bottom: 8px;">Uygulamayı Telefona Yükleyin</h3>
+      <h3 style="font-size: 17px; margin-bottom: 8px;">Uygulamayı Yükleyin</h3>
       <p style="font-size: 12px; color: var(--text-muted);">U8 Danışmanlık kartvizitini doğrudan uygulama simgesi olarak kurmak için:</p>
       
       <div class="app-guide-box">
@@ -646,7 +628,6 @@
     </div>
   </div>
 
-  <!-- ŞİFRE & LOGO MODALI -->
   <div class="modal-overlay" id="pinModal">
     <div class="modal-card">
       <button class="modal-close" onclick="closePinModal()"><i class="fa-solid fa-xmark"></i></button>
@@ -661,7 +642,6 @@
   </div>
 
   <script>
-    // Profil Verileri (Düzeltilmiş Güncel E-postalarla)
     const profiles = [
       {
         name: "Rezzan Çağıl Lama",
@@ -690,24 +670,18 @@
     let currentProfileIndex = 0;
     let deferredPrompt = null;
 
-    // PWA Yükleme Yakalayıcı
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
     });
 
-    // İndir Butonuna Basıldığında Uygulamayı Yükleme Fonksiyonu
     function installAppDirectly() {
       if (deferredPrompt) {
         deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
-          if (choiceResult.outcome === 'accepted') {
-            console.log('Uygulama başarıyla yüklendi.');
-          }
+        deferredPrompt.userChoice.then(() => {
           deferredPrompt = null;
         });
       } else {
-        // Tarayıcı otomatik kuruluma izin vermiyorsa yönlendirme rehberini aç
         document.getElementById('appModal').classList.add('active');
       }
     }
@@ -716,7 +690,6 @@
       document.getElementById('appModal').classList.remove('active');
     }
 
-    // Profil Değiştirici
     function switchProfile(index) {
       currentProfileIndex = index;
       const p = profiles[index];
@@ -727,6 +700,8 @@
       document.getElementById('profileName').innerText = p.name;
       document.getElementById('profileTitle').innerText = p.title;
       document.getElementById('profilePhoneText').innerText = p.phone;
+      document.getElementById('profileMailText').innerText = p.email;
+      document.getElementById('profileMailChip').href = "mailto:" + p.email;
       document.getElementById('avatarInitial').innerText = p.initial;
 
       document.getElementById('btnCall').href = "tel:" + p.cleanPhone;
@@ -734,15 +709,13 @@
       document.getElementById('btnMail').href = "mailto:" + p.email;
     }
 
-    // Telefon Numarasını Kopyalama
     function copyPhone() {
       const p = profiles[currentProfileIndex];
       navigator.clipboard.writeText(p.cleanPhone).then(() => {
-        alert("Telefon numarası kopyalandı: " + p.phone);
+        alert("Telefon kopyalandı: " + p.phone);
       });
     }
 
-    // vCard (.vcf) İndirip Telefona Kaydetme
     function downloadVCard() {
       const p = profiles[currentProfileIndex];
       const vcardData = [
@@ -750,7 +723,7 @@
         "VERSION:3.0",
         `N;CHARSET=UTF-8:${p.lastName};${p.firstName};;;`,
         `FN;CHARSET=UTF-8:${p.name}`,
-        "ORG;CHARSET=UTF-8:U8 Danışmanlık ve Ajans Hizmetleri",
+        "ORG;CHARSET=UTF-8:U8 Danışmanlık ve Ajans",
         `TITLE;CHARSET=UTF-8:${p.title}`,
         `TEL;TYPE=CELL,VOICE:${p.intlPhone}`,
         `EMAIL;TYPE=WORK,INTERNET:${p.email}`,
@@ -770,7 +743,6 @@
       URL.revokeObjectURL(url);
     }
 
-    // iPhone & Android Tam Uyumlu QR Kod Modalı
     function openQrModal() {
       const p = profiles[currentProfileIndex];
       document.getElementById('qrSubtitle').innerText = p.name + " (" + p.title + ")";
@@ -797,7 +769,6 @@
       document.getElementById('qrModal').classList.remove('active');
     }
 
-    // Şifreli Logo Yönetimi
     function openPinModal() {
       document.getElementById('pinInput').value = '';
       document.getElementById('pinModal').classList.add('active');
@@ -813,7 +784,7 @@
         closePinModal();
         document.getElementById('logoFileInput').click();
       } else {
-        alert("Hatalı PIN kodu!");
+        alert("Hatalı PIN!");
       }
     }
 
