@@ -52,7 +52,7 @@
     .container {
       width: 100%;
       max-width: 440px;
-      background: rgba(13, 27, 20, 0.92);
+      background: rgba(13, 27, 20, 0.95);
       backdrop-filter: blur(25px);
       -webkit-backdrop-filter: blur(25px);
       border: 1px solid var(--glass-border);
@@ -63,7 +63,6 @@
       padding-bottom: 24px;
     }
 
-    /* Admin Duyuru Bandı */
     .announcement-bar {
       display: none;
       background: linear-gradient(135deg, rgba(194, 155, 56, 0.25), rgba(128, 0, 32, 0.4));
@@ -129,25 +128,23 @@
 
     .brand-section {
       text-align: center;
-      padding: 12px 20px 14px;
+      padding: 10px 20px 12px;
     }
 
     .logo-box {
-      width: 140px;
-      margin: 0 auto 10px;
+      width: 130px;
+      height: 75px;
+      margin: 0 auto 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .logo-img {
-      width: 100%;
-      height: auto;
-      max-height: 80px;
+      max-width: 100%;
+      max-height: 100%;
       object-fit: contain;
-    }
-
-    .logo-svg {
-      width: 100%;
-      height: auto;
-      filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));
+      filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));
     }
 
     .brand-title {
@@ -248,15 +245,17 @@
     .info-chip {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 8px;
       background: rgba(255, 255, 255, 0.06);
-      padding: 7px 16px;
+      padding: 8px 18px;
       border-radius: 30px;
       border: 1px solid var(--glass-border);
       font-size: 13px;
       font-weight: 600;
       color: #cbd5e1;
       text-decoration: none;
+      white-space: nowrap;
     }
 
     .info-chip.mail-chip {
@@ -467,6 +466,7 @@
       transform: translateY(-2px);
     }
 
+    /* Modallar */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -561,7 +561,7 @@
 
   <div class="container">
     
-    <!-- Admin Duyuru Şeridi -->
+    <!-- Admin Duyuru Bandı -->
     <div class="announcement-bar" id="announcementBar">
       <div style="display: flex; align-items: center; gap: 8px;">
         <i class="fa-solid fa-bullhorn" style="color: var(--accent-gold);"></i>
@@ -582,20 +582,22 @@
       </div>
     </div>
 
+    <!-- Marka & Logo Alanı -->
     <div class="brand-section">
       <div class="logo-box">
-        <!-- Depoya yüklenecek logo.png dosyası; yoksa otomatik şık vektör logo görünür -->
-        <div class="logo-box">
-        <img src="./web_sitesinde_kullan%C4%B1labilir_de%C4%9F_903254_dkX__1_-removebg-preview.png?v=5" 
-             class="logo-img" 
-             alt="U8 Logo" 
-             onerror="this.onerror=null; this.src='web_sitesinde_kullanılabilir_değ_903254_dkX__1_-removebg-preview.png';" />
+        <img src="web_sitesinde_kullanılabilir_değ_903254_dkX__1_-removebg-preview.png" class="logo-img" alt="U8 Logo" />
       </div>
+      <h1 class="brand-title">U8 DANIŞMANLIK</h1>
+      <p class="brand-subtitle">VE AJANS HİZMETLERİ</p>
+    </div>
+
+    <!-- Profil Değiştirme Butonları -->
     <div class="tab-switch">
       <button class="tab-btn active" id="tab0" onclick="switchProfile(0)">Rezzan Çağıl Lama</button>
       <button class="tab-btn" id="tab1" onclick="switchProfile(1)">Büşra Yağar</button>
     </div>
 
+    <!-- Profil Bilgileri -->
     <div class="profile-card">
       <div class="profile-avatar-wrap">
         <div class="profile-avatar" id="avatarInitial">R</div>
@@ -607,7 +609,7 @@
         <div class="info-chip" onclick="copyPhone()" style="cursor: pointer;">
           <i class="fa-solid fa-phone"></i>
           <span id="profilePhoneText">0 551 506 19 12</span>
-          <i class="fa-regular fa-copy" style="font-size: 11px;"></i>
+          <i class="fa-regular fa-copy" style="font-size: 11px; margin-left: 4px;"></i>
         </div>
         <a href="mailto:cagillama@u8belgelendirme.com" id="profileMailChip" class="info-chip mail-chip">
           <i class="fa-solid fa-envelope"></i>
@@ -616,6 +618,7 @@
       </div>
     </div>
 
+    <!-- Uygulama Ekleme Butonu -->
     <div class="app-install-banner" onclick="installAppDirectly()">
       <div class="banner-text-wrap">
         <div class="banner-title">
@@ -627,6 +630,7 @@
       <button class="banner-btn">EKLE</button>
     </div>
 
+    <!-- Hızlı İletişim Butonları -->
     <div class="quick-actions">
       <a href="tel:05515061912" id="btnCall" class="action-tile">
         <i class="fa-solid fa-phone"></i>
@@ -650,6 +654,7 @@
       </a>
     </div>
 
+    <!-- Rehbere Kaydet Butonu -->
     <div class="save-vcard-wrap">
       <button class="btn-vcard" onclick="downloadVCard()">
         <i class="fa-solid fa-address-card"></i>
@@ -657,6 +662,7 @@
       </button>
     </div>
 
+    <!-- Hizmet Alanları Vitrini -->
     <div class="services-section">
       <div class="section-head">
         <span class="section-title">Hizmet Alanlarımız</span>
@@ -695,16 +701,18 @@
         </div>
       </div>
     </div>
+
+    <!-- Sosyal Medya İkonları -->
     <div class="social-links">
-      <a href="https://instagram.com/u8danismanlik" target="_blank" class="social-btn"><i class="fa-brands fa-instagram"></i></a>
-      <a href="https://www.linkedin.com/company/u8-uluslararas%C4%B1-belgelendirme-ve-dan%C4%B1%C5%9Fmanl%C4%B1k" target="_blank" class="social-btn"><i class="fa-brands fa-linkedin-in"></i></a>
-      <a href="https://www.facebook.com/share/1FkN7bKHu7/" target="_blank" class="social-btn"><i class="fa-brands fa-facebook-f"></i></a>
+      <a href="https://instagram.com" id="linkInstagram" target="_blank" class="social-btn"><i class="fa-brands fa-instagram"></i></a>
+      <a href="https://linkedin.com" id="linkLinkedin" target="_blank" class="social-btn"><i class="fa-brands fa-linkedin-in"></i></a>
+      <a href="https://facebook.com" id="linkFacebook" target="_blank" class="social-btn"><i class="fa-brands fa-facebook-f"></i></a>
       <a href="https://u8belgelendirme.com" target="_blank" class="social-btn"><i class="fa-solid fa-globe"></i></a>
     </div>
 
   </div>
 
-  <!-- QR KOD MODALI -->
+  <!-- QR Kod Modalı -->
   <div class="modal-overlay" id="qrModal">
     <div class="modal-card">
       <button class="modal-close" onclick="closeQrModal()"><i class="fa-solid fa-xmark"></i></button>
@@ -719,7 +727,7 @@
     </div>
   </div>
 
-  <!-- CİHAZA ÖZEL YÜKLEME REHBERİ (iPhone & Android Uyumlu) -->
+  <!-- Kurulum Rehberi Modalı -->
   <div class="modal-overlay" id="appModal">
     <div class="modal-card">
       <button class="modal-close" onclick="closeAppModal()"><i class="fa-solid fa-xmark"></i></button>
@@ -727,15 +735,13 @@
       <h3 style="font-size: 17px; margin-bottom: 6px;" id="installGuideTitle">Ana Ekrana Ekleme</h3>
       <p style="font-size: 11.5px; color: var(--text-muted);">U8 Danışmanlık logosunu telefonunuzun ekranına eklemek için:</p>
       
-      <div class="app-guide-box" id="installGuideContent">
-        <!-- Dinamik olarak JS tarafından iPhone veya Android olarak doldurulur -->
-      </div>
+      <div class="app-guide-box" id="installGuideContent"></div>
 
       <button onclick="closeAppModal()" style="margin-top: 14px; width: 100%; padding: 11px; border-radius: 12px; border: none; background: var(--primary-green); color: #fff; font-weight: 700; cursor: pointer;">Anladım</button>
     </div>
   </div>
 
-  <!-- ADMIN DUYURU & AYAR MODALI -->
+  <!-- Admin Paneli Modalı -->
   <div class="modal-overlay" id="adminModal">
     <div class="modal-card">
       <button class="modal-close" onclick="closeAdminModal()"><i class="fa-solid fa-xmark"></i></button>
@@ -790,31 +796,26 @@
     let currentProfileIndex = 0;
     let deferredPrompt = null;
 
-    // Service Worker Kaydı
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('sw.js').catch(() => {});
       });
     }
 
-    // Android için PWA istemini yakalama
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
     });
 
-    // iPhone & Android Farkını Yöneten Kurulum Fonksiyonu
     function installAppDirectly() {
       const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
       if (deferredPrompt) {
-        // Android doğrudan resmi yükleme penceresi
         deferredPrompt.prompt();
         deferredPrompt.userChoice.then(() => {
           deferredPrompt = null;
         });
       } else if (isIos) {
-        // iPhone Özel Rehberi
         document.getElementById('installGuideTitle').innerText = "iPhone'a Yükleme";
         document.getElementById('installGuideContent').innerHTML = `
           <div class="guide-step">
@@ -828,7 +829,6 @@
         `;
         document.getElementById('appModal').classList.add('active');
       } else {
-        // Android / Samsung Tarayıcı Rehberi
         document.getElementById('installGuideTitle').innerText = "Ana Ekrana Ekleme";
         document.getElementById('installGuideContent').innerHTML = `
           <div class="guide-step">
@@ -848,7 +848,6 @@
       document.getElementById('appModal').classList.remove('active');
     }
 
-    // Profil Değiştirme
     function switchProfile(index) {
       currentProfileIndex = index;
       const p = profiles[index];
@@ -928,7 +927,6 @@
       document.getElementById('qrModal').classList.remove('active');
     }
 
-    // Admin Paneli ve Duyuru Yönetimi
     function openAdminModal() {
       document.getElementById('pinInput').value = '';
       document.getElementById('adminLoginArea').style.display = 'block';
