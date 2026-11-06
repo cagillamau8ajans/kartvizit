@@ -11,7 +11,6 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="U8 Danışmanlık" />
 
-  <!-- Ayrı Manifest Dosyası Bağlantısı -->
   <link rel="manifest" href="manifest.json" />
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
@@ -53,7 +52,7 @@
     .container {
       width: 100%;
       max-width: 440px;
-      background: rgba(13, 27, 20, 0.9);
+      background: rgba(13, 27, 20, 0.92);
       backdrop-filter: blur(25px);
       -webkit-backdrop-filter: blur(25px);
       border: 1px solid var(--glass-border);
@@ -62,6 +61,23 @@
       position: relative;
       overflow: hidden;
       padding-bottom: 24px;
+    }
+
+    /* Admin Duyuru Bandı */
+    .announcement-bar {
+      display: none;
+      background: linear-gradient(135deg, rgba(194, 155, 56, 0.25), rgba(128, 0, 32, 0.4));
+      border-bottom: 1px solid rgba(194, 155, 56, 0.4);
+      padding: 10px 16px;
+      font-size: 12px;
+      color: #fff;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .announcement-bar.active {
+      display: flex;
     }
 
     .top-actions {
@@ -119,7 +135,13 @@
     .logo-box {
       width: 140px;
       margin: 0 auto 10px;
-      cursor: pointer;
+    }
+
+    .logo-img {
+      width: 100%;
+      height: auto;
+      max-height: 80px;
+      object-fit: contain;
     }
 
     .logo-svg {
@@ -539,6 +561,15 @@
 
   <div class="container">
     
+    <!-- Admin Duyuru Şeridi -->
+    <div class="announcement-bar" id="announcementBar">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <i class="fa-solid fa-bullhorn" style="color: var(--accent-gold);"></i>
+        <span id="announcementText"></span>
+      </div>
+      <i class="fa-solid fa-xmark" onclick="hideAnnouncement()" style="cursor: pointer; color: var(--text-muted);"></i>
+    </div>
+
     <div class="top-actions">
       <div class="pill-badge">
         <i class="fa-solid fa-circle-check" style="color: #4ade80;"></i>
@@ -547,13 +578,15 @@
       <div class="action-icons">
         <button class="icon-btn" onclick="openQrModal()" title="Karekod"><i class="fa-solid fa-qrcode"></i></button>
         <button class="icon-btn" onclick="installAppDirectly()" title="Uygulama Olarak Yükle"><i class="fa-solid fa-mobile-screen-button"></i></button>
-        <button class="icon-btn" onclick="openPinModal()" title="Logo Yönetimi"><i class="fa-solid fa-lock"></i></button>
+        <button class="icon-btn" onclick="openAdminModal()" title="Yönetici Girişi"><i class="fa-solid fa-lock"></i></button>
       </div>
     </div>
 
     <div class="brand-section">
-      <div class="logo-box" onclick="openPinModal()">
-        <svg class="logo-svg" viewBox="0 0 200 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <div class="logo-box">
+        <!-- Depoya yüklenecek logo.png dosyası; yoksa otomatik şık vektör logo görünür -->
+        <img src="logo.png" class="logo-img" alt="U8 Logo" onerror="this.style.display='none'; document.getElementById('fallbackLogo').style.display='block';" />
+        <svg id="fallbackLogo" class="logo-svg" viewBox="0 0 200 120" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: none;">
           <text x="50" y="88" font-family="'Playfair Display', Georgia, serif" font-size="96" font-weight="800" fill="#1b3b2b" letter-spacing="-3">U</text>
           <text x="82" y="98" font-family="'Playfair Display', Georgia, serif" font-size="94" font-weight="900" fill="#800020" letter-spacing="-2">8</text>
         </svg>
@@ -676,6 +709,7 @@
 
   </div>
 
+  <!-- QR KOD MODALI -->
   <div class="modal-overlay" id="qrModal">
     <div class="modal-card">
       <button class="modal-close" onclick="closeQrModal()"><i class="fa-solid fa-xmark"></i></button>
@@ -690,38 +724,45 @@
     </div>
   </div>
 
+  <!-- CİHAZA ÖZEL YÜKLEME REHBERİ (iPhone & Android Uyumlu) -->
   <div class="modal-overlay" id="appModal">
     <div class="modal-card">
       <button class="modal-close" onclick="closeAppModal()"><i class="fa-solid fa-xmark"></i></button>
       <i class="fa-solid fa-circle-check" style="font-size: 38px; color: #4ade80; margin-bottom: 10px;"></i>
-      <h3 style="font-size: 17px; margin-bottom: 6px;">Ana Ekrana Ekleme</h3>
+      <h3 style="font-size: 17px; margin-bottom: 6px;" id="installGuideTitle">Ana Ekrana Ekleme</h3>
       <p style="font-size: 11.5px; color: var(--text-muted);">U8 Danışmanlık logosunu telefonunuzun ekranına eklemek için:</p>
       
-      <div class="app-guide-box">
-        <div class="guide-step">
-          <div class="step-num">1</div>
-          <div>Ekranın altındaki veya üstündeki <strong>üç noktaya (⋮)</strong> veya menüye <strong>(≡)</strong> dokunun.</div>
-        </div>
-        <div class="guide-step">
-          <div class="step-num">2</div>
-          <div><strong>"Ana Ekrana Ekle"</strong> veya <strong>"Uygulamayı Yükle"</strong> seçeneğine basın.</div>
-        </div>
+      <div class="app-guide-box" id="installGuideContent">
+        <!-- Dinamik olarak JS tarafından iPhone veya Android olarak doldurulur -->
       </div>
 
       <button onclick="closeAppModal()" style="margin-top: 14px; width: 100%; padding: 11px; border-radius: 12px; border: none; background: var(--primary-green); color: #fff; font-weight: 700; cursor: pointer;">Anladım</button>
     </div>
   </div>
 
-  <div class="modal-overlay" id="pinModal">
+  <!-- ADMIN DUYURU & AYAR MODALI -->
+  <div class="modal-overlay" id="adminModal">
     <div class="modal-card">
-      <button class="modal-close" onclick="closePinModal()"><i class="fa-solid fa-xmark"></i></button>
+      <button class="modal-close" onclick="closeAdminModal()"><i class="fa-solid fa-xmark"></i></button>
       <i class="fa-solid fa-shield-halved" style="font-size: 32px; color: var(--accent-gold); margin-bottom: 10px;"></i>
-      <h3 style="font-size: 16px; margin-bottom: 6px;">Yönetici Girişi</h3>
-      <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 14px;">Logo güncellemek için PIN kodunu girin.</p>
-      <input type="password" id="pinInput" maxlength="6" placeholder="••••" style="width: 120px; padding: 10px; text-align: center; font-size: 20px; letter-spacing: 5px; border-radius: 10px; border: 1px solid var(--glass-border); background: rgba(0,0,0,0.4); color: #fff; margin-bottom: 14px;" />
-      <br/>
-      <button onclick="verifyPin()" style="padding: 10px 24px; border-radius: 12px; border: none; background: var(--primary-green); color: #fff; font-weight: 700; cursor: pointer;">Giriş Yap</button>
-      <input type="file" id="logoFileInput" accept="image/*" style="display: none;" onchange="handleLogoUpload(event)" />
+      <h3 style="font-size: 16px; margin-bottom: 6px;">Yönetici Paneli</h3>
+      
+      <div id="adminLoginArea">
+        <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 14px;">Giriş için 4 haneli PIN kodunu girin.</p>
+        <input type="password" id="pinInput" maxlength="6" placeholder="••••" style="width: 120px; padding: 10px; text-align: center; font-size: 20px; letter-spacing: 5px; border-radius: 10px; border: 1px solid var(--glass-border); background: rgba(0,0,0,0.4); color: #fff; margin-bottom: 14px;" />
+        <br/>
+        <button onclick="verifyPin()" style="padding: 10px 24px; border-radius: 12px; border: none; background: var(--primary-green); color: #fff; font-weight: 700; cursor: pointer;">Giriş Yap</button>
+      </div>
+
+      <div id="adminPanelArea" style="display: none; text-align: left;">
+        <label style="font-size: 12px; color: var(--accent-gold); font-weight: 700; display: block; margin-bottom: 6px;">Duyuru Metni:</label>
+        <textarea id="adminAnnouncementInput" rows="3" placeholder="Örn: Yeni web tasarım paketlerimiz yayınlandı!" style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid var(--glass-border); background: rgba(0,0,0,0.4); color: #fff; font-size: 12px; resize: none; margin-bottom: 12px;"></textarea>
+        
+        <div style="display: flex; gap: 8px;">
+          <button onclick="saveAnnouncement()" style="flex: 1; padding: 10px; border-radius: 10px; border: none; background: var(--primary-green); color: #fff; font-weight: 700; cursor: pointer;">Duyuruyu Yayınla</button>
+          <button onclick="clearAnnouncement()" style="padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: #f87171; cursor: pointer;">Kaldır</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -754,28 +795,56 @@
     let currentProfileIndex = 0;
     let deferredPrompt = null;
 
-    // Harici sw.js Dosyasını Kaydetme (Modern PWA Yükleme Motoru)
+    // Service Worker Kaydı
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js')
-          .then(() => console.log('Service Worker bağlandı.'))
-          .catch(err => console.log('SW hatası:', err));
+        navigator.serviceWorker.register('sw.js').catch(() => {});
       });
     }
 
-    // Tarayıcının resmi kurulum istemini yakalama
+    // Android için PWA istemini yakalama
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
     });
 
+    // iPhone & Android Farkını Yöneten Kurulum Fonksiyonu
     function installAppDirectly() {
+      const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
       if (deferredPrompt) {
+        // Android doğrudan resmi yükleme penceresi
         deferredPrompt.prompt();
         deferredPrompt.userChoice.then(() => {
           deferredPrompt = null;
         });
+      } else if (isIos) {
+        // iPhone Özel Rehberi
+        document.getElementById('installGuideTitle').innerText = "iPhone'a Yükleme";
+        document.getElementById('installGuideContent').innerHTML = `
+          <div class="guide-step">
+            <div class="step-num">1</div>
+            <div>Safari'nin altındaki <strong>Paylaş <i class="fa-solid fa-arrow-up-from-bracket"></i></strong> simgesine dokunun.</div>
+          </div>
+          <div class="guide-step">
+            <div class="step-num">2</div>
+            <div>Açılan menüde aşağı kaydırıp <strong>"Ana Ekrana Ekle"</strong> seçeneğine basın.</div>
+          </div>
+        `;
+        document.getElementById('appModal').classList.add('active');
       } else {
+        // Android / Samsung Tarayıcı Rehberi
+        document.getElementById('installGuideTitle').innerText = "Ana Ekrana Ekleme";
+        document.getElementById('installGuideContent').innerHTML = `
+          <div class="guide-step">
+            <div class="step-num">1</div>
+            <div>Tarayıcının sağ üstündeki <strong>üç noktaya (⋮)</strong> veya sağ alttaki <strong>menüye (≡)</strong> dokunun.</div>
+          </div>
+          <div class="guide-step">
+            <div class="step-num">2</div>
+            <div><strong>"Uygulamayı Yükle"</strong> veya <strong>"Ana Ekrana Ekle"</strong> seçeneğine basın.</div>
+          </div>
+        `;
         document.getElementById('appModal').classList.add('active');
       }
     }
@@ -784,6 +853,7 @@
       document.getElementById('appModal').classList.remove('active');
     }
 
+    // Profil Değiştirme
     function switchProfile(index) {
       currentProfileIndex = index;
       const p = profiles[index];
@@ -863,42 +933,60 @@
       document.getElementById('qrModal').classList.remove('active');
     }
 
-    function openPinModal() {
+    // Admin Paneli ve Duyuru Yönetimi
+    function openAdminModal() {
       document.getElementById('pinInput').value = '';
-      document.getElementById('pinModal').classList.add('active');
+      document.getElementById('adminLoginArea').style.display = 'block';
+      document.getElementById('adminPanelArea').style.display = 'none';
+      document.getElementById('adminModal').classList.add('active');
     }
 
-    function closePinModal() {
-      document.getElementById('pinModal').classList.remove('active');
+    function closeAdminModal() {
+      document.getElementById('adminModal').classList.remove('active');
     }
 
     function verifyPin() {
       const pin = document.getElementById('pinInput').value;
       if (pin === "1912") {
-        closePinModal();
-        document.getElementById('logoFileInput').click();
+        document.getElementById('adminLoginArea').style.display = 'none';
+        document.getElementById('adminPanelArea').style.display = 'block';
+        document.getElementById('adminAnnouncementInput').value = localStorage.getItem('u8_announcement') || '';
       } else {
         alert("Hatalı PIN!");
       }
     }
 
-    function handleLogoUpload(e) {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(event) {
-          const logoBox = document.querySelector('.logo-box');
-          logoBox.innerHTML = `<img src="${event.target.result}" style="width: 100%; height: auto; max-height: 80px; object-fit: contain;" alt="Logo" />`;
-          localStorage.setItem('u8_custom_logo', event.target.result);
-        };
-        reader.readAsDataURL(file);
+    function saveAnnouncement() {
+      const text = document.getElementById('adminAnnouncementInput').value.trim();
+      if (text) {
+        localStorage.setItem('u8_announcement', text);
+        showAnnouncement(text);
+        alert("Duyuru yayınlandı.");
       }
+      closeAdminModal();
+    }
+
+    function clearAnnouncement() {
+      localStorage.removeItem('u8_announcement');
+      document.getElementById('announcementBar').classList.remove('active');
+      document.getElementById('adminAnnouncementInput').value = '';
+      alert("Duyuru kaldırıldı.");
+      closeAdminModal();
+    }
+
+    function showAnnouncement(text) {
+      document.getElementById('announcementText').innerText = text;
+      document.getElementById('announcementBar').classList.add('active');
+    }
+
+    function hideAnnouncement() {
+      document.getElementById('announcementBar').classList.remove('active');
     }
 
     window.onload = function() {
-      const savedLogo = localStorage.getItem('u8_custom_logo');
-      if (savedLogo) {
-        document.querySelector('.logo-box').innerHTML = `<img src="${savedLogo}" style="width: 100%; height: auto; max-height: 80px; object-fit: contain;" alt="Logo" />`;
+      const savedNotice = localStorage.getItem('u8_announcement');
+      if (savedNotice) {
+        showAnnouncement(savedNotice);
       }
     };
   </script>
